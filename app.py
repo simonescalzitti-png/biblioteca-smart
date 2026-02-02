@@ -3,47 +3,70 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-st.set_page_config(page_title="Biblioteca Scolastica", page_icon="📚")
+st.set_page_config(page_title="Biblioteca Smart", page_icon="📚", layout="wide")
 
-# 1. Caricamento dati (con il trucco per il separatore che abbiamo usato prima)
 @st.cache_data
 def load_data():
+    # Il trucco sep=None serve per gestire sia virgole che punti e virgola di Excel
     return pd.read_csv('biblioteca.csv', sep=None, engine='python')
 
 df = load_data()
 
-st.title("📚 Consigli di Lettura su Misura")
+st.title("📚 Sistema di Raccomandazione Bibliotecaria")
+st.markdown("---")
 
-# --- NUOVA SEZIONE: FILTRO ETÀ ---
-st.sidebar.header("Impostazioni Utente")
-eta_utente = st.sidebar.number_input("Quanti anni hai?", min_value=5, max_value=19, value=11)
+# --- SIDEBAR PER FILTRI ---
+st.sidebar.header("🔍 Filtra per Studente")
+eta_utente = st.sidebar.slider("Quanti anni hai?", 5, 18, 12)
 
-# Filtriamo subito il database: teniamo solo i libri adatti all'utente
-df_filtrato = df[df['eta_minima'] <= eta_utente].reset_index(drop=True)
+# Estraiamo i mood dal CSV
+mood_disponibili = df['mood'].unique().tolist()
+mood_scelto = st.sidebar.selectbox("Come ti senti oggi?", ["Qualsiasi"] + mood_disponibili)
 
+# --- LOGICA DI FILTRAGGIO ---
+# 1. Filtro Età
+df_filtrato = df[df['eta_minima'] <= eta_utente]
+
+# 2. Filtro Mood
+if mood_scelto != "Qualsiasi":
+    df_filtrato = df_filtrato[df_filtrato['mood'] == mood_scelto]
+
+df_filtrato = df_filtrato.reset_index(drop=True)
+
+# --- INTERFACCIA PRINCIPALE ---
 if df_filtrato.empty:
-    st.warning("Ops! Non ci sono ancora libri catalogati per la tua fascia d'età.")
+    st.warning("Non abbiamo trovato libri per questi filtri. Prova ad aumentare l'età o cambiare mood!")
 else:
-    # 2. Ricalcoliamo la somiglianza solo sui libri filtrati
+    # Preparazione Motore (TF-IDF sui Tags)
     tfidf = TfidfVectorizer(stop_words=['il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'una'])
     tfidf_matrix = tfidf.fit_transform(df_filtrato['tags'])
     cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 
-    # 3. Selezione libro (tra quelli filtrati)
-    libro_scelto = st.selectbox("Quale libro ti è piaciuto tra questi?", df_filtrato['titolo'].values)
+    # Scelta del libro base
+    libro_scelto = st.selectbox("Quale libro hai letto e ti è piaciuto?", df_filtrato['titolo'].values)
 
-    if st.button('Trova il prossimo libro'):
+    if st.button('Genera Consigli'):
         idx = df_filtrato[df_filtrato['titolo'] == libro_scelto].index[0]
-        punteggi = list(enumerate(cosine_sim[idx]))
-        punteggi = sorted(punteggi, key=lambda x: x[1], reverse=True)
         
-        # Prendiamo i consigli (escludendo se stessi)
-        consigli = [p for p in punteggi if p[0] != idx][:3]
+        # Calcolo somiglianza
+        sim_scores = list(enumerate(cosine_sim[idx]))
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
         
-        st.subheader(f"Dato che hai {eta_utente} anni, ti consigliamo:")
+        # Prendiamo i primi 3 libri diversi da quello scelto
+        libri_consigliati = [i for i in sim_scores if i[0] != idx][:3]
+
+        st.markdown("### ✨ Ecco cosa dovresti leggere dopo:")
+        
         cols = st.columns(3)
-        
-        for i, (index, score) in enumerate(consigli):
+        for i, (index, score) in enumerate(libri_consigliati):
+            libro = df_filtrato.iloc[index]
             with cols[i]:
-                st.success(f"**{df_filtrato.iloc[index]['titolo']}**")
-                st.caption(f"Età consigliata: {df_filtrato.iloc[index]['eta_minima']}+")
+                st.info(f"#### {libro['titolo']}")
+                st.write(f"**Autore:** {libro['autore']}")
+                st.write(f"**Mood:** {libro['mood']}")
+                
+                # Visualizzazione Recensione
+                st.markdown(f"💬 *'{libro['recensione']}'*")
+                
+                # Feedback simulato (Stelline)
+                st.write("⭐" * 5)
