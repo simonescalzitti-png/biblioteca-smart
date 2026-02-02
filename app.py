@@ -18,7 +18,7 @@ st.markdown("---")
 
 # --- SIDEBAR PER FILTRI ---
 st.sidebar.header("🔍 Personalizza")
-eta_utente = st.sidebar.slider("Quanti anni hai?", 5, 18, 11)
+eta_utente = st.sidebar.slider("Quanti anni hai?")
 
 mood_disponibili = df['mood'].unique().tolist()
 mood_scelto = st.sidebar.selectbox("Come ti senti oggi?", ["Qualsiasi"] + mood_disponibili)
