@@ -1,10 +1,9 @@
 import streamlit as st
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+import random
 
-# Configurazione della pagina
-st.set_page_config(page_title="Biblioteca Smart", page_icon="📚", layout="wide")
+# Configurazione minima
+st.set_page_config(page_title="Catalogo Libri", page_icon="📖")
 
 @st.cache_data
 def load_data():
@@ -12,59 +11,46 @@ def load_data():
 
 df = load_data()
 
-st.title("📚 Il Tuo Consulente Letterario")
-st.markdown("Trova il libro perfetto in base alla tua età e al tuo umore.")
-st.markdown("---")
+st.title("📖 Catalogo della Biblioteca")
+st.markdown("Cerca un libro e controlla se è disponibile.")
 
-# --- SIDEBAR PER FILTRI ---
-st.sidebar.header("🔍 Personalizza")
-eta_utente = st.sidebar.slider("Quanti anni hai?")
-
-mood_disponibili = df['mood'].unique().tolist()
-mood_scelto = st.sidebar.selectbox("Come ti senti oggi?", ["Qualsiasi"] + mood_disponibili)
-
-# --- LOGICA DI FILTRAGGIO ---
-df_filtrato = df[df['eta_minima'] <= eta_utente]
-
-if mood_scelto != "Qualsiasi":
-    df_filtrato = df_filtrato[df_filtrato['mood'] == mood_scelto]
-
-df_filtrato = df_filtrato.reset_index(drop=True)
-
-# --- VISUALIZZAZIONE RISULTATI ---
-if df_filtrato.empty:
-    st.warning("Nessun libro trovato. Prova a cambiare i filtri nella colonna a sinistra!")
+# --- INTERFACCIA ---
+if df.empty:
+    st.warning("Il catalogo è vuoto.")
 else:
-    # Motore di calcolo
-    tfidf = TfidfVectorizer(stop_words=['il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'una'])
-    tfidf_matrix = tfidf.fit_transform(df_filtrato['tags'].fillna(''))
-    cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
-
-    libro_scelto = st.selectbox("Scegli un libro che ti è piaciuto:", df_filtrato['titolo'].values)
-
-    if st.button('Genera Consigli ✨'):
-        idx = df_filtrato[df_filtrato['titolo'] == libro_scelto].index[0]
-        sim_scores = list(enumerate(cosine_sim[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        
-        libri_consigliati = [i for i in sim_scores if i[0] != idx][:3]
-
-        if not libri_consigliati:
-            st.info("Abbiamo trovato solo questo libro per questa categoria!")
+    # Selezione del libro
+    libro_scelto = st.selectbox("Seleziona un libro per vedere i dettagli:", df['titolo'].values)
+    
+    # Recupero info del libro selezionato
+    info_libro = df[df['titolo'] == libro_scelto].iloc[0]
+    
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader(f"📗 {info_libro['titolo']}")
+        st.write(f"✍️ **Autore:** {info_libro['autore']}")
+    
+    with col2:
+        qta = int(info_libro['quantita'])
+        if qta > 0:
+            st.success(f"✅ Disponibile ({qta} copie)")
         else:
-            st.markdown("### 🎯 Ecco i libri scelti per te:")
-            cols = st.columns(3)
-            for i, (index, score) in enumerate(libri_consigliati):
-                libro = df_filtrato.iloc[index]
-                with cols[i]:
-                    st.success(f"**{libro['titolo']}**")
-                    st.write(f"✍️ **Autore:** {libro['autore']}")
-                    
-                    # Mostriamo solo la quantità
-                    qta = int(libro['quantita'])
-                    if qta > 0:
-                        st.write(f"📦 **Disponibilità:** {qta} copie")
-                    else:
-                        st.error("❌ Al momento in prestito")
-                    
-                    st.caption(f"📈 Affinità: {round(score * 100)}%")
+            st.error("❌ Al momento in prestito")
+
+    st.markdown("---")
+    
+    # Funzione "Altri libri di questo autore"
+    autore_scelto = info_libro['autore']
+    altri_libri = df[(df['autore'] == autore_scelto) & (df['titolo'] != libro_scelto)]
+    
+    if not altri_libri.empty:
+        st.write(f"📚 **Altri libri di {autore_scelto}:**")
+        for t in altri_libri['titolo']:
+            st.write(f"- {t}")
+    else:
+        # Se non ci sono altri libri dello stesso autore, suggeriamo libri a caso
+        st.write("🎲 **Ti suggeriamo anche:**")
+        suggerimenti_casuali = df[df['titolo'] != libro_scelto].sample(min(len(df)-1, 3))
+        for t in suggerimenti_casuali['titolo']:
+            st.write(f"- {t}")
