@@ -1,13 +1,14 @@
-titolo,autore,tags,eta_minima
-ALBERO E FOGLIA,J. R. R. TOLKIEN,FANTASY,9
-BIG FISH,DANIEL WALLACE,NARRATIVA,12
-CARI MOSTRI,STEFANO BENNI,NARRATIVA,12
-DISCORSO SUL METODO,RENATO CARTESIO,SAGGISTICA,14
-ETICA DELL'INTELLIGENZA ARTIFICIALE,LUCIANO FLORIDI,SAGGISTICA,18
-FAVOLE PER BAMBINI MOLTO STANCHI,DENTE,POESIA,9
-IL MONDO DI SOFIA,JOSTEIN GAARDER,NARRATIVA,14
-IL NO DI GIACOMO,VALENTINA SECCHI,ALBO ILLUSTRATO,6
-IL PICCOLO PRINCIPE,ANTOINE DE SAINT-EXUPERY,NARRATIVA PER GIOVANI,6
+titolo,autore,tags,eta_minima,mood,recensione
+ALBERO E FOGLIA,J. R. R. TOLKIEN,FANTASY,9,riflessivo,"Un saggio sulle fiabe seguito da numerose fiabe."
+BIG FISH,DANIEL WALLACE,NARRATIVA,12,avventuroso,"La vita di un padre raccontata dagli occhi del figlio."
+CARI MOSTRI,STEFANO BENNI,NARRATIVA,12,avventuroso,"Libro che raccoglie storie sulla paura."
+DISCORSO SUL METODO,RENATO CARTESIO,SAGGISTICA,14,riflessivo,"Un capolavoro che apre alla modernità."
+ETICA DELL'INTELLIGENZA ARTIFICIALE,LUCIANO FLORIDI,SAGGISTICA,18,riflessivo,"Un testo indispensabile per chi vuole approfondire la filosofia morale delle nuove tecnologie."
+FAVOLE PER BAMBINI MOLTO STANCHI,DENTE,POESIA,9,divertente,"Poesie che parlano di mondi immaginari e personaggi fantastici."
+IL MONDO DI SOFIA,JOSTEIN GAARDER,NARRATIVA,14,divertente riflessivo,"Un classico intramontabile che racconta in maniera avventura la storia della filosofia."
+IL NO DI GIACOMO,VALENTINA SECCHI,ALBO ILLUSTRATO,6,riflessivo divertente,"Un albo illustrato sulla vita di Giacomo Matteotti."
+IL PICCOLO PRINCIPE,ANTOINE DE SAINT-EXUPERY,NARRATIVA PER GIOVANI,6, riflessivo divertente avventuroso,"Una storia profonda che insegna l'importanza dei legami."
 
-IO NON HO PAURA,NICCOLO' AMMANITI,GIALLO,18
+IO NON HO PAURA,NICCOLO' AMMANITI,GIALLO,18,riflessivo avventuroso,"Un thriller coinvolgente che chiude l'età dei sogni per quella degli adulti."
+
 
