@@ -7,6 +7,7 @@ st.set_page_config(page_title="Catalogo Libri", page_icon="📖")
 
 @st.cache_data
 def load_data():
+    # Carica il CSV rispettando l'ordine delle tue colonne
     return pd.read_csv('biblioteca.csv', sep=None, engine='python')
 
 df = load_data()
@@ -30,6 +31,10 @@ else:
     with col1:
         st.subheader(f"📗 {info_libro['titolo']}")
         st.write(f"✍️ **Autore:** {info_libro['autore']}")
+        
+        # --- ORDINE MODIFICATO ---
+        st.write(f"👶 **Età consigliata:** {info_libro['eta_minima']}+ anni")
+        st.write(f"🎭 **Genere:** {info_libro['genere']}")
     
     with col2:
         qta = int(info_libro['quantita'])
@@ -49,7 +54,7 @@ else:
         for t in altri_libri['titolo']:
             st.write(f"- {t}")
     else:
-        # Se non ci sono altri libri dello stesso autore, suggeriamo libri a caso
+        # Suggerimenti casuali se non ci sono altri libri dello stesso autore
         st.write("🎲 **Ti suggeriamo anche:**")
         suggerimenti_casuali = df[df['titolo'] != libro_scelto].sample(min(len(df)-1, 3))
         for t in suggerimenti_casuali['titolo']:
